@@ -5,9 +5,13 @@ export type NoteDocument = Note & Document;
 
 @Schema()
 export class Note {
+  @Prop()
+  id: number
 
   @Prop({ required: true })
   name: string;
+  @Prop({ required: true })
+  created: string
 
   @Prop({ required: true })
   category: string;
