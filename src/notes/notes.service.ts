@@ -2,6 +2,7 @@ import { Injectable, ForbiddenException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { CreateNoteDto } from "./dto/create-note.dto";
+import { UpdateNoteDto } from "./dto/update-note.dto";
 import { notes } from "./notes.mock";
 import { Note, NoteDocument } from "./schemas/note.schema";
 
@@ -13,9 +14,9 @@ export class NotesService {
     return this.notes
   }
   async getById(id: number) {
-    const noteIndex = this.notes.findIndex(note => note.id === id);
-    if (noteIndex < 0) {
-      throw new ForbiddenException(`The note with id ${id} does not exist`);
+    const index = this.notes.findIndex(note => note.id === id);
+    if (index < 0) {
+      throw new ForbiddenException(`The note with such ${id} does not exist`);
     } else {
       return this.notes.find(note => note.id === id);
     }
@@ -84,6 +85,31 @@ export class NotesService {
     this.notes.push(newNote)
     return this.notes;
 
+  }
+
+  async deleteNote(id: number): Promise<Note[]> {
+    const index = this.notes.findIndex(note => note.id === id);
+    if (index < 0) {
+      throw new ForbiddenException(`The note with such ${id} does not exist`);
+    } else {
+      const delIndex = this.notes.findIndex(note => note.id === id);
+      this.notes.splice(delIndex, 1);
+    }
+
+    return this.notes;
+  }
+
+  async updateNote(id: number, updateNoteDto: UpdateNoteDto): Promise<Note[]> {
+    const index = this.notes.findIndex(note => note.id === id);
+    if (index < 0) {
+      throw new ForbiddenException(`The note with such ${id} does not exist`);
+    } else {
+      this.notes[index].category = updateNoteDto.category;
+      this.notes[index].name = updateNoteDto.name;
+      this.notes[index].content = updateNoteDto.content;
+      this.notes[index].archived = updateNoteDto.archived;
+    }
+    return this.notes;
   }
 
 }

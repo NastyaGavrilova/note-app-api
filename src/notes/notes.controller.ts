@@ -1,5 +1,6 @@
-import { Controller, Get, Param, ParseIntPipe, NotFoundException, Post, Body } from "@nestjs/common";
+import { Controller, Get, Param, ParseIntPipe, NotFoundException, Post, Body, Delete, Patch } from "@nestjs/common";
 import { CreateNoteDto } from "./dto/create-note.dto";
+import { UpdateNoteDto } from "./dto/update-note.dto";
 // import { IdValidationPipe } from "src/pipe/idValid.pipe";
 import { NotesService } from "./notes.service";
 import { Note } from "./schemas/note.schema";
@@ -33,5 +34,18 @@ export class NotesController {
     return this.notesService.createNote(createNoteDto)
   }
 
+  @Delete('/:id')
+  deleteNote(
+    @Param('id', ParseIntPipe) id: number
+  ) {
+    return this.notesService.deleteNote(id)
+  }
+  @Patch('/:id')
+  updateNote(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateNoteDto: UpdateNoteDto
+  ) {
+    return this.notesService.updateNote(id, updateNoteDto)
+  }
 
 }
