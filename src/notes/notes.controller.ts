@@ -1,4 +1,5 @@
-import { Controller, Get, Param, ParseIntPipe, NotFoundException, } from "@nestjs/common";
+import { Controller, Get, Param, ParseIntPipe, NotFoundException, Post, Body } from "@nestjs/common";
+import { CreateNoteDto } from "./dto/create-note.dto";
 // import { IdValidationPipe } from "src/pipe/idValid.pipe";
 import { NotesService } from "./notes.service";
 import { Note } from "./schemas/note.schema";
@@ -24,6 +25,12 @@ export class NotesController {
       throw new NotFoundException('Note with this ID not found')
     }
     return note;
+  }
+  @Post('')
+  createNote(
+    @Body() createNoteDto: CreateNoteDto
+  ) {
+    return this.notesService.createNote(createNoteDto)
   }
 
 

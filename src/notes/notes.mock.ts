@@ -8,7 +8,7 @@ export const notes: Note[] = [
     category: "Task",
     content: "Tomatoes, bread",
     date: '',
-    active: true,
+    archived: false,
   },
   {
     id: 2,
@@ -17,7 +17,7 @@ export const notes: Note[] = [
     category: "Random Thought",
     content: "The evolution",
     date: '',
-    active: true,
+    archived: false,
   },
   {
     id: 3,
@@ -26,7 +26,7 @@ export const notes: Note[] = [
     category: "Idea",
     content: "Implement new feature in project on the 15/09/2022",
     date: '15/09/2022',
-    active: true,
+    archived: false,
   },
   {
     id: 4,
@@ -35,7 +35,7 @@ export const notes: Note[] = [
     category: "Quote",
     content: "Power doesn't co...",
     date: '',
-    active: true,
+    archived: false,
   },
   {
     id: 5,
@@ -44,6 +44,15 @@ export const notes: Note[] = [
     category: "Task",
     content: "The Lean Startup",
     date: '',
-    active: false,
+    archived: true,
+  },
+  {
+    id: 6,
+    name: "Dantist",
+    created: "Sep 28, 2022",
+    category: "Task",
+    content: "Visit a dantist on 12/10/2022",
+    date: '12/10/2022',
+    archived: true,
   }
 ]

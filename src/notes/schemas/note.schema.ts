@@ -20,7 +20,7 @@ export class Note {
   content: string;
 
   @Prop({ required: true })
-  active: boolean;
+  archived: boolean;
 
   @Prop({
     required: true,
