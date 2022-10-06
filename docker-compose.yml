@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   main: 
-    container_name: elated-panini
+    container_name: note-app
     image: note-app-api
     build: 
       context: .
@@ -19,17 +19,25 @@ services:
       - postgres
 
   postgres:
-    container_name: postgres
-    image: postgres
+    container_name: db_note
+    image: postgres:latest
     restart: always
     environment:
-      POSTGRES_DB: postgres_db
-      POSTGRES_USER: postgres_user
-      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_DB: note_db
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - ./postgres_data:/var/lib/postgresql/data
     ports:
       - 5432:5432
+  pg-admin:
+    container_name: pg-admin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: noemail@noemail.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - 5050:80
 volumes:
   pgdata:
 
