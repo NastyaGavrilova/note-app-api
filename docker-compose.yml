@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  main: 
+    container_name: note-app
+    image: note-app-api
+    build: 
+      context: .
+      target: development
+      dockerfile: ./Dockerfile
+    command: npm run start:dev
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - 3000:3000
+    restart: always
+    depends_on:
+      - postgres
+
+  postgres:
+    container_name: db_note
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_DB: note_db
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+  pg-admin:
+    container_name: pg-admin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: noemail@noemail.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - 5050:80
+volumes:
+  pgdata:

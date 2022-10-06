@@ -1,115 +1,81 @@
 import { Injectable, ForbiddenException } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
 import { CreateNoteDto } from "./dto/create-note.dto";
 import { UpdateNoteDto } from "./dto/update-note.dto";
-import { notes } from "./notes.mock";
-import { Note, NoteDocument } from "./schemas/note.schema";
+import { InjectModel } from '@nestjs/sequelize';
+import { Sequelize, QueryTypes } from 'sequelize';
+import { Note } from "./notes.model";
 
 @Injectable()
 export class NotesService {
-  notes: Note[] = notes
+  constructor(@InjectModel(Note) private Notes: typeof Note) { }
 
-  async getAll(): Promise<Note[]> {
-    return this.notes
+  async getAll() {
+    return this.Notes.findAll({ include: { all: true } })
   }
   async getById(id: number) {
-    const index = this.notes.findIndex(note => note.id === id);
-    if (index < 0) {
-      throw new ForbiddenException(`The note with such ${id} does not exist`);
-    } else {
-      return this.notes.find(note => note.id === id);
+    return await this.Notes.findOne({
+      where: { id },
+      include: { all: true },
+    });
+  }
+  async getStats() {
+    const sequelize = new Sequelize(
+      process.env.DB_NAME,
+      process.env.DB_USER,
+      process.env.DB_PASSWORD,
+      {
+        dialect: 'postgres',
+        host: process.env.DB_HOST,
+      },
+    );
+
+    sequelize
+      .authenticate()
+      .then(() => console.log('Connected.'))
+      .catch((err) => console.error('Connection error: ', err));
+
+    return await sequelize.query(
+      `select 
+			category, 
+			sum(case when archived then 1 else 0 end) as archived,
+			sum(case when archived then 0 else 1 end) as active
+		from
+			"Notes" 
+		group by
+			category`,
+      {
+        raw: true,
+        type: QueryTypes.SELECT,
+      },
+    );
+  }
+
+  async createNote(createNoteDto: CreateNoteDto) {
+    return await this.Notes.create(createNoteDto);
+
+  }
+
+  async deleteNote(id: number) {
+    const note = await this.Notes
+      .findOne({ where: { id } })
+      .catch((e) => {
+        console.log(e.message);
+      });
+    if (!note) console.log('Remove error');
+    else await note.destroy();
+  }
+
+  async updateNote(id: number, updateNoteDto: UpdateNoteDto) {
+    try {
+      await this.Notes.update(updateNoteDto, { where: { id } });
+      return await this.Notes.findOne({
+        where: { id },
+        include: { all: true },
+      });
+    } catch (err) {
+      console.log(err);
     }
   }
-  async getStats(): Promise<Array<Object>> {
-    const categories = [];
-    this.notes.forEach(note => {
-      if (!categories.find(category => category === note.category)) {
-        categories.push(note.category);
-      }
-    })
-    const statistics = [];
-    categories.forEach(category => {
-      let activeNote = 0;
-      let archivedNote = 0;
-      this.notes.forEach(note => {
 
-        if (note.category === category && note.archived === false) {
-          activeNote = activeNote + 1
-        } if (note.category === category && note.archived === true) {
-          archivedNote = archivedNote + 1;
-        }
-      })
-
-      const categoryObj = {
-        categoryName: category,
-        activeNotes: activeNote,
-        archivedNotes: archivedNote,
-      }
-      statistics.push(categoryObj);
-    })
-
-    return statistics;
-  }
-
-  async createNote(createNoteDto: CreateNoteDto): Promise<Note[]> {
-    const id = Date.now();
-    const created = new Date();
-    const month = created.getMonth();
-    const day = created.getDate();
-    const year = created.getFullYear();
-    const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-    const createdDate = `${monthNames[month]} ${day}, ${year}`;
-    const newNote = {
-      id: id,
-      name: createNoteDto.name,
-      created: createdDate,
-      category: createNoteDto.category,
-      content: createNoteDto.content,
-      date: createNoteDto.date,
-      archived: createNoteDto.archived,
-    }
-    this.notes.push(newNote)
-    return this.notes;
-
-  }
-
-  async deleteNote(id: number): Promise<Note[]> {
-    const index = this.notes.findIndex(note => note.id === id);
-    if (index < 0) {
-      throw new ForbiddenException(`The note with such ${id} does not exist`);
-    } else {
-      const delIndex = this.notes.findIndex(note => note.id === id);
-      this.notes.splice(delIndex, 1);
-    }
-
-    return this.notes;
-  }
-
-  async updateNote(id: number, updateNoteDto: UpdateNoteDto): Promise<Note[]> {
-    const index = this.notes.findIndex(note => note.id === id);
-    if (index < 0) {
-      throw new ForbiddenException(`The note with such ${id} does not exist`);
-    } else {
-      this.notes[index].category = updateNoteDto.category;
-      this.notes[index].name = updateNoteDto.name;
-      this.notes[index].content = updateNoteDto.content;
-      this.notes[index].archived = updateNoteDto.archived;
-    }
-    return this.notes;
-  }
 
 }
